@@ -1,5 +1,5 @@
 {
-  "name": "modbus-serial",
+  "name": "node-modbus",
   "version": "8.0.13",
   "description": "A pure JavaScript implemetation of MODBUS-RTU (Serial and TCP) for NodeJS.",
   "main": "index.js",
@@ -8,22 +8,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yaacov/node-modbus-serial.git"
+    "url": "git+https://github.com/onlxltd/node-modbus.git"
   },
   "keywords": [
     "modbus",
-    "rtu",
-    "serial",
-    "port",
-    "com",
-    "arduino"
+    "tcp"
   ],
   "author": "Yaacov Zamir <kobi.zamir@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/yaacov/node-modbus-serial/issues"
+    "url": "https://github.com/onlxltd/node-modbus/issues"
   },
-  "homepage": "https://github.com/yaacov/node-modbus-serial#readme",
+  "homepage": "https://github.com/onlxltd/node-modbus#readme",
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
@@ -41,7 +37,6 @@
     "webbluetooth": "^3.1.0"
   },
   "dependencies": {
-    "debug": "^4.3.1",
-    "serialport": "^12.0.0"
+    "debug": "^4.3.1"
   }
 }

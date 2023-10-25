@@ -1,12 +1,10 @@
 import { Socket, SocketConstructorOpts, TcpSocketConnectOpts } from 'net';
 import { TestPort } from "./TestPort";
-import { PortInfo } from '@serialport/bindings-cpp';
 
-export class ModbusRTU {
+export class Modbus {
   constructor(port?: any);
   static TestPort: typeof TestPort
 
-  static getPorts(): Promise<PortInfo[]>
 
   open(callback: Function): void;
   close(callback: Function): void;
@@ -23,8 +21,6 @@ export class ModbusRTU {
   writeFC16(address: number, dataAddress: number, values: Array<number>, next: NodeStyleCallback<WriteMultipleResult>): void;
 
   // Connection shorthand API
-  connectRTU(path: string, options: SerialPortOptions, next: Function): void;
-  connectRTU(path: string, options: SerialPortOptions): Promise<void>;
   connectTCP(ip: string, options: TcpPortOptions, next: Function): void;
   connectTCP(ip: string, options: TcpPortOptions): Promise<void>;
   connectUDP(ip: string, options: UdpPortOptions, next: Function): void;
@@ -35,10 +31,6 @@ export class ModbusRTU {
   connectTelnet(ip: string, options: TelnetPortOptions): Promise<void>;
   connectC701(ip: string, options: C701PortOptions, next: Function): void;
   connectC701(ip: string, options: C701PortOptions): Promise<void>;
-  connectRTUBuffered(path: string, options: SerialPortOptions, next: Function): void;
-  connectRTUBuffered(path: string, options: SerialPortOptions): Promise<void>;
-  connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): void;
-  connectAsciiSerial(path: string, options: SerialPortOptions): Promise<void>;
   linkTCP(socket: Socket, options: TcpPortOptions, next: Function): void;
   linkTCP(socket: Socket, options: TcpPortOptions): Promise<void>;
   linkTcpRTUBuffered(socket: Socket, options: TcpRTUPortOptions, next: Function): void;

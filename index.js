@@ -18,7 +18,6 @@
 /* Add bit operation functions to Buffer
  */
 require("./utils/buffer_bit")();
-const { SerialPort } = require("serialport");
 const crc16 = require("./utils/crc16");
 const modbusSerialDebug = require("debug")("modbus-serial");
 
@@ -1176,19 +1175,11 @@ require("./apis/worker")(ModbusRTU);
 // exports
 module.exports = ModbusRTU;
 
-module.exports.getPorts = function getPorts() {
-    return SerialPort.list();
-};
-
 module.exports.TestPort = require("./ports/testport");
-try {
-    module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
-} catch (err) { }
 module.exports.TcpPort = require("./ports/tcpport");
 module.exports.TcpRTUBufferedPort = require("./ports/tcprtubufferedport");
 module.exports.TelnetPort = require("./ports/telnetport");
 module.exports.C701Port = require("./ports/c701port");
 
 module.exports.ServerTCP = require("./servers/servertcp");
-module.exports.ServerSerial = require("./servers/serverserial");
 module.exports.default = module.exports;

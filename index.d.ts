@@ -1,4 +1,4 @@
-import {ModbusRTU} from "./ModbusRTU";
+import { Modbus } from "./Modbus";
 export * from "./ServerTCP";
 
-export default ModbusRTU;
+export default Modbus;
