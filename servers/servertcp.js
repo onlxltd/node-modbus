@@ -17,7 +17,6 @@
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const net = require("net");
-const modbusSerialDebug = require("debug")("modbus-serial");
 
 const HOST = "127.0.0.1";
 const UNIT_ID = 255; // listen to all adresses
@@ -49,19 +48,10 @@ function _serverDebug(text, unitID, functionCode, responseBuffer) {
     // If no responseBuffer, then assume this is an error
     // o/w assume an action
     if (typeof responseBuffer === "undefined") {
-        modbusSerialDebug({
-            error: text,
-            unitID: unitID,
-            functionCode: functionCode
-        });
+        
 
     } else {
-        modbusSerialDebug({
-            action: text,
-            unitID: unitID,
-            functionCode: functionCode,
-            responseBuffer: responseBuffer.toString("hex")
-        });
+        
     }
 }
 
@@ -126,7 +116,7 @@ function _callbackFactory(unitID, functionCode, sockWriter) {
 function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, options) {
     // Check requestBuffer length
     if (!requestBuffer || requestBuffer.length < MBAP_LEN) {
-        modbusSerialDebug("wrong size of request Buffer " + requestBuffer.length);
+        
         return;
     }
 
@@ -136,17 +126,16 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, opt
 
     // if crc is bad, ignore message
     if (crc !== crc16(requestBuffer.slice(0, -2))) {
-        modbusSerialDebug("wrong CRC of request Buffer");
+        
         return;
     }
 
     // if crc is bad, ignore message
     if (serverUnitID !== 255 && serverUnitID !== unitID) {
-        modbusSerialDebug("wrong unitID");
+        
         return;
     }
 
-    modbusSerialDebug("request for function code " + functionCode);
     const cb = _callbackFactory(unitID, functionCode, sockWriter);
 
     switch (parseInt(functionCode)) {
@@ -191,11 +180,6 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, opt
             const responseBuffer = Buffer.alloc(3 + 2);
             responseBuffer.writeUInt8(errorCode, 2);
 
-            modbusSerialDebug({
-                error: "Illegal function",
-                functionCode: functionCode
-            });
-
             cb({ modbusErrorCode: errorCode }, responseBuffer);
         }
     }
@@ -234,22 +218,13 @@ class ServerTCP extends EventEmitter {
             let recvBuffer = Buffer.from([]);
             modbus.socks.set(sock, 0);
 
-            modbusSerialDebug({
-                action: "connected",
-                address: sock.address(),
-                remoteAddress: sock.remoteAddress,
-                localPort: sock.localPort
-            });
-
             sock.once("close", function() {
-                modbusSerialDebug({
-                    action: "closed"
-                });
+                
                 modbus.socks.delete(sock);
             });
 
             sock.on("data", function(data) {
-                modbusSerialDebug({ action: "socket data", data: data });
+                
                 recvBuffer = Buffer.concat([recvBuffer, data], recvBuffer.length + data.length);
 
                 while(recvBuffer.length > MBAP_LEN) {
@@ -270,9 +245,6 @@ class ServerTCP extends EventEmitter {
                     const crc = crc16(requestBuffer.slice(0, -2));
                     requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
-                    modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
-                    modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
-
                     const sockWriter = function(err, responseBuffer) {
                         if (err) {
                             modbus.emit("error", err);
@@ -287,9 +259,6 @@ class ServerTCP extends EventEmitter {
                             outTcp.writeUInt16BE(0, 2);
                             outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
                             responseBuffer.copy(outTcp, 6);
-
-                            modbusSerialDebug({ action: "send", data: responseBuffer });
-                            modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
 
                             // write to port
                             sock.write(outTcp);
@@ -311,8 +280,6 @@ class ServerTCP extends EventEmitter {
             });
 
             sock.on("error", function(err) {
-                modbusSerialDebug(JSON.stringify({ action: "socket error", data: err }));
-
                 modbus.emit("socketError", err);
             });
         });
@@ -334,10 +301,6 @@ class ServerTCP extends EventEmitter {
             modbus.socks.forEach(function(e, sock) {
                 sock.destroy();
             });
-
-            modbusSerialDebug({ action: "close server" });
-        } else {
-            modbusSerialDebug({ action: "close server", warning: "server already closed" });
         }
     }
 }

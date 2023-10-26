@@ -2,7 +2,6 @@
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const net = require("net");
-const modbusSerialDebug = require("debug")("modbus-serial");
 
 const crc16 = require("../utils/crc16");
 
@@ -101,9 +100,6 @@ class TcpPort extends EventEmitter {
             let crc;
             let length;
 
-            // data recived
-            modbusSerialDebug({ action: "receive tcp port strings", data: data });
-
             // check data length
             while (data.length > MIN_MBAP_LENGTH) {
                 // parse tcp header length
@@ -121,9 +117,6 @@ class TcpPort extends EventEmitter {
                 self._transactionIdRead = data.readUInt16BE(0);
                 self.emit("data", buffer);
 
-                // debug
-                modbusSerialDebug({ action: "parsed tcp port", buffer: buffer, transactionId: self._transactionIdRead });
-
                 // reset data
                 data = data.slice(length + MIN_MBAP_LENGTH);
             }
@@ -131,13 +124,11 @@ class TcpPort extends EventEmitter {
 
         this._client.on("connect", function() {
             self.openFlag = true;
-            modbusSerialDebug("TCP port: signal connect");
             handleCallback();
         });
 
         this._client.on("close", function(had_error) {
             self.openFlag = false;
-            modbusSerialDebug("TCP port: signal close: " + had_error);
             handleCallback(had_error);
 
             self.emit("close");
@@ -146,7 +137,6 @@ class TcpPort extends EventEmitter {
 
         this._client.on("error", function(had_error) {
             self.openFlag = false;
-            modbusSerialDebug("TCP port: signal error: " + had_error);
             handleCallback(had_error);
         });
 
@@ -154,7 +144,6 @@ class TcpPort extends EventEmitter {
             // modbus.openFlag is left in its current state as it reflects two types of timeouts,
             // i.e. 'false' for "TCP connection timeout" and 'true' for "Modbus response timeout"
             // (this allows to continue Modbus request re-tries without reconnecting TCP).
-            modbusSerialDebug("TCP port: TimedOut");
             handleCallback(new Error("TCP Connection Timed Out"));
         });
     }
@@ -178,7 +167,6 @@ class TcpPort extends EventEmitter {
             this.callback = callback;
             this._client.connect(this.connectOptions);
         } else if(this.openFlag) {
-            modbusSerialDebug("TCP port: external socket is opened");
             callback(); // go ahead to setup existing socket
         } else {
             callback(new Error("TCP port: external socket is not opened"));
@@ -215,7 +203,6 @@ class TcpPort extends EventEmitter {
      */
     write(data) {
         if(data.length < MIN_DATA_LENGTH) {
-            modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
             return;
         }
 
@@ -229,15 +216,6 @@ class TcpPort extends EventEmitter {
         buffer.writeUInt16BE(0, 2);
         buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
         data.copy(buffer, MIN_MBAP_LENGTH);
-
-        modbusSerialDebug({
-            action: "send tcp port",
-            data: data,
-            buffer: buffer,
-            unitid: this._id,
-            functionCode: this._cmd,
-            transactionsId: this._transactionIdWrite
-        });
 
         // send buffer to slave
         this._client.write(buffer);

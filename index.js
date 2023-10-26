@@ -19,7 +19,6 @@
  */
 require("./utils/buffer_bit")();
 const crc16 = require("./utils/crc16");
-const modbusSerialDebug = require("debug")("modbus-serial");
 
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
@@ -588,7 +587,6 @@ class ModbusRTU extends EventEmitter {
         // open the serial port
         modbus._port.open(function(error) {
             if (error) {
-                modbusSerialDebug({ action: "port open error", error: error });
                 /* On serial port open error call next function */
                 if (callback)
                     callback(error);
