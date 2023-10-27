@@ -2,7 +2,6 @@
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const net = require("net");
-const modbusSerialDebug = require("debug")("modbus-serial");
 
 /* TODO: const should be set once, maybe */
 const EXCEPTION_LENGTH = 5;
@@ -71,25 +70,6 @@ class TelnetPort extends EventEmitter {
             // check if buffer include a complete modbus answer
             const expectedLength = self._length;
             const bufferLength = self._buffer.length;
-            modbusSerialDebug(
-                "on data expected length:" +
-                    expectedLength +
-                    " buffer length:" +
-                    bufferLength
-            );
-
-            modbusSerialDebug({
-                action: "receive tcp telnet port",
-                data: data,
-                buffer: self._buffer
-            });
-            modbusSerialDebug(
-                JSON.stringify({
-                    action: "receive tcp telnet port strings",
-                    data: data,
-                    buffer: self._buffer
-                })
-            );
 
             // check data length
             if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
@@ -142,7 +122,6 @@ class TelnetPort extends EventEmitter {
             // modbus.openFlag is left in its current state as it reflects two types of timeouts,
             // i.e. 'false' for "TCP connection timeout" and 'true' for "Modbus response timeout"
             // (this allows to continue Modbus request re-tries without reconnecting TCP).
-            modbusSerialDebug("TelnetPort port: TimedOut");
             handleCallback(new Error("TelnetPort Connection Timed Out."));
         });
     }
@@ -183,7 +162,6 @@ class TelnetPort extends EventEmitter {
             this.callback = callback;
             this._client.connect(this.port, this.ip);
         } else if(this.openFlag) {
-            modbusSerialDebug("telnet port: external socket is opened");
             callback(); // go ahead to setup existing socket
         } else {
             callback(new Error("telnet port: external socket is not opened"));
@@ -220,10 +198,6 @@ class TelnetPort extends EventEmitter {
      */
     write(data) {
         if (data.length < MIN_DATA_LENGTH) {
-            modbusSerialDebug(
-                "expected length of data is to small - minimum is " +
-                    MIN_DATA_LENGTH
-            );
             return;
         }
 
@@ -259,22 +233,6 @@ class TelnetPort extends EventEmitter {
 
         // send buffer to slave
         this._client.write(data);
-
-        modbusSerialDebug({
-            action: "send tcp telnet port",
-            data: data,
-            unitid: this._id,
-            functionCode: this._cmd
-        });
-
-        modbusSerialDebug(
-            JSON.stringify({
-                action: "send tcp telnet port strings",
-                data: data,
-                unitid: this._id,
-                functionCode: this._cmd
-            })
-        );
     }
 }
 

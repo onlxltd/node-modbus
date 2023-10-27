@@ -2,7 +2,6 @@
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const dgram = require("dgram");
-const modbusSerialDebug = require("debug")("modbus-serial");
 
 const crc16 = require("../utils/crc16");
 
@@ -52,9 +51,6 @@ class ModbusUdpPort extends EventEmitter {
                 return;
             }
 
-            // data received
-            modbusSerialDebug({ action: "receive udp port strings", data: data });
-
             // check data length
             while (data.length > MIN_MBAP_LENGTH) {
                 // parse udp header length
@@ -71,9 +67,6 @@ class ModbusUdpPort extends EventEmitter {
                 // update transaction id and emit data
                 modbus._transactionIdRead = data.readUInt16BE(0);
                 modbus.emit("data", buffer);
-
-                // debug
-                modbusSerialDebug({ action: "parsed udp port", buffer: buffer, transactionId: modbus._transactionIdRead });
 
                 // reset data
                 data = data.slice(length + MIN_MBAP_LENGTH);
@@ -127,7 +120,6 @@ class ModbusUdpPort extends EventEmitter {
      */
     write(data) {
         if(data.length < MIN_DATA_LENGTH) {
-            modbusSerialDebug("expected length of data is too small - minimum is " + MIN_DATA_LENGTH);
             return;
         }
 
@@ -141,15 +133,6 @@ class ModbusUdpPort extends EventEmitter {
         buffer.writeUInt16BE(0, 2);
         buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
         data.copy(buffer, MIN_MBAP_LENGTH);
-
-
-        modbusSerialDebug({
-            action: "send modbus udp port",
-            data: data,
-            buffer: buffer,
-            unitid: this._id,
-            functionCode: this._cmd
-        });
 
         // send buffer via udp
         this._client.send(buffer, 0, buffer.length, this.port, this.ip);

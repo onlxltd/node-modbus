@@ -2,7 +2,6 @@
 "use strict";
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
-const modbusSerialDebug = require("debug")("modbus-serial");
 
 /* Add bit operation functions to Buffer
  */
@@ -78,7 +77,6 @@ class TestPort extends EventEmitter {
         let i = null;
 
         if(data.length < MIN_DATA_LENGTH) {
-            modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
             return;
         }
 
@@ -290,22 +288,6 @@ class TestPort extends EventEmitter {
             }
 
             this.emit("data", buffer);
-
-            modbusSerialDebug({
-                action: "send test port",
-                data: data,
-                buffer: buffer,
-                unitid: unitNumber,
-                functionCode: functionCode
-            });
-
-            modbusSerialDebug(JSON.stringify({
-                action: "send test port strings",
-                data: data,
-                buffer: buffer,
-                unitid: unitNumber,
-                functionCode: functionCode
-            }));
         }
     }
 }

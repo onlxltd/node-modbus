@@ -2,7 +2,7 @@
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const net = require("net");
-const modbusSerialDebug = require("debug")("modbus-serial");
+
 
 const crc16 = require("../utils/crc16");
 
@@ -79,12 +79,6 @@ class TcpRTUBufferedPort extends EventEmitter {
             // add data to buffer
             modbus._buffer = Buffer.concat([modbus._buffer, data]);
 
-            modbusSerialDebug({
-                action: "receive tcp rtu buffered port",
-                data: data,
-                buffer: modbus._buffer
-            });
-
             // check if buffer include a complete modbus answer
             let bufferLength = modbus._buffer.length;
 
@@ -107,13 +101,6 @@ class TcpRTUBufferedPort extends EventEmitter {
                 const protocolID = modbus._buffer.readUInt16BE(i + 2);
                 const msgLength = modbus._buffer.readUInt16BE(i + 4);
                 const cmd = modbus._buffer[i + 7];
-
-                modbusSerialDebug({
-                    protocolID: protocolID,
-                    msgLength: msgLength,
-                    bufferLength: bufferLength,
-                    cmd: cmd
-                });
 
                 if (
                     protocolID === 0 &&
@@ -148,7 +135,6 @@ class TcpRTUBufferedPort extends EventEmitter {
             // modbus.openFlag is left in its current state as it reflects two types of timeouts,
             // i.e. 'false' for "TCP connection timeout" and 'true' for "Modbus response timeout"
             // (this allows to continue Modbus request re-tries without reconnecting TCP).
-            modbusSerialDebug("TcpRTUBufferedPort port: TimedOut");
             handleCallback(new Error("TcpRTUBufferedPort Connection Timed Out"));
         });
     }
@@ -186,14 +172,6 @@ class TcpRTUBufferedPort extends EventEmitter {
 
             modbus.emit("data", buffer);
 
-            // debug
-            modbusSerialDebug({
-                action: "parsed tcp buffered port",
-                buffer: buffer,
-                transactionId: modbus._transactionIdRead
-            });
-        } else {
-            modbusSerialDebug({ action: "emit data to short", data: data });
         }
     }
 
@@ -207,7 +185,6 @@ class TcpRTUBufferedPort extends EventEmitter {
             this.callback = callback;
             this._client.connect(this.connectOptions);
         } else if(this.openFlag) {
-            modbusSerialDebug("TcpRTUBuffered port: external socket is opened");
             callback(); // go ahead to setup existing socket
         } else {
             callback(new Error("TcpRTUBuffered port: external socket is not opened"));
@@ -245,10 +222,6 @@ class TcpRTUBufferedPort extends EventEmitter {
      */
     write(data) {
         if (data.length < MIN_DATA_LENGTH) {
-            modbusSerialDebug(
-                "expected length of data is to small - minimum is " +
-                    MIN_DATA_LENGTH
-            );
             return;
         }
 
@@ -258,13 +231,6 @@ class TcpRTUBufferedPort extends EventEmitter {
         buffer.writeUInt16BE(0, 2);
         buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
         data.copy(buffer, MIN_MBAP_LENGTH);
-
-        modbusSerialDebug({
-            action: "send tcp rtu buffered port",
-            data: data,
-            buffer: buffer,
-            transactionsId: this._transactionIdWrite
-        });
 
         // get next transaction id
         this._transactionIdWrite =

@@ -2,7 +2,6 @@
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const dgram = require("dgram");
-const modbusSerialDebug = require("debug")("modbus-serial");
 
 const crc16 = require("../utils/crc16");
 
@@ -71,14 +70,8 @@ class UdpPort extends EventEmitter {
             // get the serial data from the C701 packet
             buffer = data.slice(data.length - modbus._length);
 
-            modbusSerialDebug({ action: "receive c701 upd port", data: data, buffer: buffer });
-            modbusSerialDebug(JSON.stringify({ action: "receive c701 upd port strings", data: data, buffer: buffer }));
-
             // check the serial data
             if (_checkData(modbus, buffer)) {
-                modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
-                modbusSerialDebug(JSON.stringify({ action: "emit data serial rtu buffered port strings", buffer: buffer }));
-
                 modbus.emit("data", buffer);
             } else {
                 // check for modbus exception
@@ -87,12 +80,6 @@ class UdpPort extends EventEmitter {
 
                 // check the serial data
                 if (_checkData(modbus, buffer)) {
-                    modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
-                    modbusSerialDebug(JSON.stringify({
-                        action: "emit data serial rtu buffered port strings",
-                        buffer: buffer
-                    }));
-
                     modbus.emit("data", buffer);
                 }
             }
@@ -145,7 +132,6 @@ class UdpPort extends EventEmitter {
      */
     write(data) {
         if(data.length < MIN_DATA_LENGTH) {
-            modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
             return;
         }
 
@@ -193,22 +179,6 @@ class UdpPort extends EventEmitter {
 
         // send buffer to C701 UDP to serial bridge
         this._client.send(buffer, 0, buffer.length, this.port, this.ip);
-
-        modbusSerialDebug({
-            action: "send c701 upd port",
-            data: data,
-            buffer: buffer,
-            unitid: this._id,
-            functionCode: this._cmd
-        });
-
-        modbusSerialDebug(JSON.stringify({
-            action: "send c701 upd port strings",
-            data: data,
-            buffer: buffer,
-            unitid: this._id,
-            functionCode: this._cmd
-        }));
     }
 }
 

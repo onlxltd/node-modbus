@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
 
-const modbusSerialDebug = require("debug")("modbus-serial");
-
 /**
  * Check the length of request Buffer for length of 8.
  *
@@ -28,7 +26,6 @@ const modbusSerialDebug = require("debug")("modbus-serial");
 function _errorRequestBufferLength(requestBuffer) {
 
     if (requestBuffer.length !== 8) {
-        modbusSerialDebug("request Buffer length " + requestBuffer.length + " is wrong - has to be == 8");
         return true;
     }
 
@@ -45,7 +42,6 @@ function _errorRequestBufferLength(requestBuffer) {
 function _errorRequestBufferLengthEnron(requestBuffer) {
 
     if (requestBuffer.length !== 10) {
-        modbusSerialDebug("request (Enron) Buffer length " + requestBuffer.length + " is wrong - has to be == 10");
         return true;
     }
 
@@ -127,7 +123,6 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 responseBuffer.writeBit(value, i % 8, 3 + parseInt(i / 8));
 
                 if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC" + fc + " response", responseBuffer: responseBuffer });
 
                     callbackInvoked = true;
                     callback(null, responseBuffer);
@@ -241,7 +236,6 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
             responseBuffer.writeUInt16BE(value, 3 + (i * valueSize));
 
             if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
 
                 callbackInvoked = true;
                 callback(null, responseBuffer);
@@ -379,8 +373,6 @@ function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, enronT
             responseBuffer.writeUInt32BE(value, 3 + (i * valueSize));
 
             if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
-
                 callbackInvoked = true;
                 callback(null, responseBuffer);
             }
@@ -510,8 +502,6 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
             responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
             if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC4 response", responseBuffer: responseBuffer });
-
                 callbackInvoked = true;
                 callback(null, responseBuffer);
             }
@@ -623,8 +613,6 @@ function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
             }
 
             if (!callbackInvoked) {
-                modbusSerialDebug({ action: "FC5 response", responseBuffer: responseBuffer });
-
                 callbackInvoked = true;
                 callback(null, responseBuffer);
             }
@@ -681,8 +669,6 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
             }
 
             if (!callbackInvoked) {
-                modbusSerialDebug({ action: "FC6 response", responseBuffer: responseBuffer });
-
                 callbackInvoked = true;
                 callback(null, responseBuffer);
             }
@@ -744,8 +730,6 @@ function _handleWriteSingleRegisterEnron(requestBuffer, vector, unitID, enronTab
             }
 
             if (!callbackInvoked) {
-                modbusSerialDebug({ action: "FC6 response", responseBuffer: responseBuffer });
-
                 callbackInvoked = true;
                 callback(null, responseBuffer);
             }
@@ -805,8 +789,6 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             cbCount = cbCount + 1;
 
             if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC15 response", responseBuffer: responseBuffer });
-
                 callbackInvoked = true;
                 callback(null, responseBuffer);
             }
@@ -898,8 +880,6 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
         }
 
         if (!callbackInvoked) {
-            modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
-
             callbackInvoked = true;
             callback(null, responseBuffer);
         }
